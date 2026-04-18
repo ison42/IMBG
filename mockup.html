@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI + 五行性格分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* 游戏风格背景元素 */
+        .background-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.3);
+            animation-delay: 0s;
+        }
+        
+        .floating-element:nth-child(2) {
+            top: 30%;
+            right: 15%;
+            font-size: 30px;
+            color: rgba(255, 255, 255, 0.2);
+            animation-delay: 2s;
+        }
+        
+        .floating-element:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            font-size: 35px;
+            color: rgba(255, 255, 255, 0.25);
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 3px solid #ff6b6b;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+            transition: all 0.3s ease;
+            border: 2px solid #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .input-field {
+            border: 3px solid #4ecdc4;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .input-field:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 5px rgba(255, 107, 107, 0.2);
+            transform: scale(1.02);
+        }
+        
+        .mbti-option {
+            transition: all 0.3s ease;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mbti-option:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+        
+        .mbti-option.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .mbti-option::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+        
+        .mbti-option:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 3px solid #4ecdc4;
+            animation: fadeIn 0.5s ease-in-out;
+            position: relative;
+        }
+        
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+            transform: rotate(-45deg);
+            animation: shine 4s ease-in-out infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .loading-spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #ff6b6b;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .step-indicator {
+            position: relative;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            right: 16px;
+            height: 4px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+        
+        .step {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            transform: scale(1.2);
+        }
+        
+        .step-circle {
+            transition: all 0.3s ease;
+        }
+        
+        .question-option {
+            transition: all 0.3s ease;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
+        .question-option:hover {
+            transform: translateY(-2px);
+            border-color: #4ecdc4;
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+        }
+        
+        .question-option.selected {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(78, 205, 196, 0.1));
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .character-icon {
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .result-title {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .highlight-box {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.3), transparent);
+            animation: highlight 3s ease-in-out infinite;
+        }
+        
+        @keyframes highlight {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <!-- 背景元素 -->
+    <div class="background-elements">
+        <div class="floating-element">🎮</div>
+        <div class="floating-element">🌟</div>
+        <div class="floating-element">⚡</div>
+    </div>
+    
+    <div class="w-full max-w-md">
+        <!-- 步骤指示器 -->
+        <div id="step-indicator" class="step-indicator flex justify-between mb-8">
+            <div class="step active flex flex-col items-center">
+                <div class="step-circle w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center">1</div>
+                <span class="text-sm mt-2 text-white font-bold">角色创建</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div class="step-circle w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">2</div>
+                <span class="text-sm mt-2 text-white font-bold">冒险测试</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div class="step-circle w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">3</div>
+                <span class="text-sm mt-2 text-white font-bold">英雄档案</span>
+            </div>
+        </div>
+        
+        <!-- 步骤1：基本信息 -->
+        <div id="step-1" class="card p-6">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">性格冒险家</h2>
+            <p class="text-center text-gray-600 mb-8">准备好探索你的性格冒险了吗？</p>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-3 font-bold">选择你的性格职业</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="mbti-option selected p-3 text-center cursor-pointer">
+                        <div class="text-3xl mb-1">🧙‍♂️</div>
+                        <span class="font-bold">INTJ</span>
+                        <p class="text-xs text-gray-500">智慧巫师</p>
+                    </div>
+                    <div class="mbti-option p-3 text-center cursor-pointer">
+                        <div class="text-3xl mb-1">🔬</div>
+                        <span class="font-bold">INTP</span>
+                        <p class="text-xs text-gray-500">科学怪人</p>
+                    </div>
+                    <div class="mbti-option p-3 text-center cursor-pointer">
+                        <div class="text-3xl mb-1">👑</div>
+                        <span class="font-bold">ENTJ</span>
+                        <p class="text-xs text-gray-500">王国领主</p>
+                    </div>
+                    <div class="mbti-option p-3 text-center cursor-pointer">
+                        <div class="text-3xl mb-1">🎭</div>
+                        <span class="font-bold">ENTP</span>
+                        <p class="text-xs text-gray-500">百变戏法</p>
+                    </div>
+                </div>
+                <div class="text-right mt-3">
+                    <button class="text-sm text-purple-600 font-bold">查看全部职业</button>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-3 font-bold">选择你的出生日期</label>
+                <input type="date" class="input-field w-full p-3">
+                <p class="text-xs text-gray-500 mt-2">这将决定你的五行属性</p>
+            </div>
+            
+            <button id="next-step-1" class="btn-primary w-full py-3 rounded-lg text-white font-bold text-lg">
+                开始冒险
+            </button>
+        </div>
+        
+        <!-- 步骤2：校准题目 -->
+        <div id="step-2" class="card p-6 hidden">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">冒险测试</h2>
+            <p class="text-center text-gray-600 mb-8">面对以下挑战，你会如何选择？</p>
+            
+            <div class="mb-8">
+                <div class="bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg mb-6">
+                    <p class="text-gray-700 font-bold mb-4">📜 冒险任务：神秘宝藏</p>
+                    <p class="text-gray-600 mb-4">你发现了一张古老的宝藏地图，地图上标记了一个危险但充满宝藏的洞穴。你会怎么做？</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="question-option p-4 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center">
+                                <span class="text-gray-500">A</span>
+                            </div>
+                            <div>
+                                <p class="font-bold">🔍 仔细分析地图</p>
+                                <p class="text-xs text-gray-500">研究地图上的每一个细节，制定详细的探险计划</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question-option p-4 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center">
+                                <span class="text-gray-500">B</span>
+                            </div>
+                            <div>
+                                <p class="font-bold">👥 组建冒险小队</p>
+                                <p class="text-xs text-gray-500">找几个可靠的伙伴一起前往，分工合作</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question-option p-4 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center">
+                                <span class="text-gray-500">C</span>
+                            </div>
+                            <div>
+                                <p class="font-bold">⚡ 立即出发</p>
+                                <p class="text-xs text-gray-500">凭借直觉和勇气，直接前往洞穴探险</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="question-option p-4 cursor-pointer">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full border-2 border-gray-300 mr-4 flex items-center justify-center">
+                                <span class="text-gray-500">D</span>
+                            </div>
+                            <div>
+                                <p class="font-bold">📚 寻找更多信息</p>
+                                <p class="text-xs text-gray-500">先查阅相关资料，了解洞穴的历史和可能的危险</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between">
+                <button id="prev-step-2" class="py-3 px-6 rounded-lg border-2 border-gray-300 text-gray-700 font-bold">
+                    重新选择
+                </button>
+                <button id="next-step-2" class="btn-primary py-3 px-6 rounded-lg text-white font-bold">
+                    提交冒险选择
+                </button>
+            </div>
+        </div>
+        
+        <!-- 步骤3：分析结果 -->
+        <div id="step-3" class="card p-6 hidden">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">英雄档案</h2>
+            <p class="text-center text-gray-600 mb-8">恭喜你完成了性格冒险测试！</p>
+            
+            <div class="result-card p-5 mb-6">
+                <div class="flex items-center mb-6">
+                    <div class="character-icon w-20 h-20 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center text-white text-4xl font-bold">
+                        INTJ
+                    </div>
+                    <div class="ml-5">
+                        <h3 class="text-2xl font-bold result-title">智慧巫师 + 金命</h3>
+                        <p class="text-gray-600">完美主义的策略大师</p>
+                    </div>
+                </div>
+                
+                <div class="mb-5">
+                    <div class="flex items-center mb-2">
+                        <div class="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white mr-2">
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-700">英雄特质</h4>
+                    </div>
+                    <p class="text-gray-600 pl-10">你是一个理性到近乎冷血的战略家，永远在计算最优解。你的大脑就像一台精密的计算器，时刻在分析利弊，制定计划。你对自己和他人都有着极高的标准，容不得半点敷衍。</p>
+                </div>
+                
+                <div class="mb-5">
+                    <div class="flex items-center mb-2">
+                        <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white mr-2">
+                            <i class="fa fa-exclamation-triangle"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-700">冒险警告</h4>
+                    </div>
+                    <p class="text-gray-600 pl-10">你太过于追求完美，以至于常常陷入分析 paralysis。你对别人的要求太高，容易让周围的人感到压力山大。你有时候会显得过于冷漠，缺乏同理心，让人觉得难以接近。</p>
+                </div>
+                
+                <div class="mb-5">
+                    <div class="flex items-center mb-2">
+                        <div class="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-white mr-2">
+                            <i class="fa fa-lightbulb-o"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-700">大师建议</h4>
+                    </div>
+                    <p class="text-gray-600 pl-10">别总把自己当人生导师，不是所有人都需要你的“最优解”。偶尔放松一下，允许自己和别人犯点小错误，生活不是数学题，没有唯一正确的答案。多笑一笑，不然你那张扑克脸真的会把人吓跑。</p>
+                </div>
+                
+                <div class="highlight-box bg-gradient-to-r from-purple-100 to-pink-100 border-l-4 border-purple-500 p-4 rounded">
+                    <div class="flex items-center mb-2">
+                        <div class="text-2xl mr-2">💥</div>
+                        <h4 class="font-bold text-purple-800">爆梗结论</h4>
+                    </div>
+                    <p class="text-purple-700">你是一个行走的人形AI，大脑里装着无数个Excel表格，随时准备对一切进行数据分析。但记住，人类不是数据点，有时候感性比理性更重要。</p>
+                </div>
+            </div>
+            
+            <button id="restart" class="btn-primary w-full py-3 rounded-lg text-white font-bold text-lg">
+                重新冒险
+            </button>
+        </div>
+        
+        <!-- 加载动画 -->
+        <div id="loading" class="card p-6 flex flex-col items-center justify-center hidden">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-bold">正在生成你的英雄档案...</p>
+            <p class="text-xs text-gray-500 mt-2">魔法师正在施展分析咒语</p>
+        </div>
+    </div>
+    
+    <script>
+        // 步骤切换逻辑
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const step3 = document.getElementById('step-3');
+        const loading = document.getElementById('loading');
+        const steps = document.querySelectorAll('.step');
+        
+        // 下一步按钮
+        document.getElementById('next-step-1').addEventListener('click', function() {
+            step1.classList.add('hidden');
+            step2.classList.remove('hidden');
+            steps[1].classList.add('active');
+        });
+        
+        // 上一步按钮
+        document.getElementById('prev-step-2').addEventListener('click', function() {
+            step2.classList.add('hidden');
+            step1.classList.remove('hidden');
+            steps[1].classList.remove('active');
+        });
+        
+        // 提交分析按钮
+        document.getElementById('next-step-2').addEventListener('click', function() {
+            step2.classList.add('hidden');
+            loading.classList.remove('hidden');
+            
+            // 模拟加载时间
+            setTimeout(function() {
+                loading.classList.add('hidden');
+                step3.classList.remove('hidden');
+                steps[2].classList.add('active');
+            }, 2000);
+        });
+        
+        // 重新分析按钮
+        document.getElementById('restart').addEventListener('click', function() {
+            step3.classList.add('hidden');
+            step1.classList.remove('hidden');
+            
+            // 重置步骤指示器
+            steps.forEach((step, index) => {
+                if (index === 0) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        });
+        
+        // MBTI选项点击
+        document.querySelectorAll('.mbti-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.mbti-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+        
+        // 题目选项点击
+        document.querySelectorAll('.question-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.question-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
