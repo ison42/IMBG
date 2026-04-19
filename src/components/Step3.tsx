@@ -17,42 +17,42 @@ const Step3: React.FC<Step3Props> = ({ userData, onRestart }) => {
 
   // MBTI昵称映射
   const mbtiNicknames: Record<string, string> = {
-    'INFJ': '绿老头',
-    'INFP': '小蝴蝶',
-    'INTJ': '战略家',
+    'INTJ': '建筑师',
     'INTP': '逻辑学家',
-    'ENFJ': '教导主任',
-    'ENFP': '快乐小狗',
-    'ENTJ': '霸道总裁',
-    'ENTP': '发明家',
-    'ISFJ': '守护者',
-    'ISFP': '艺术家',
-    'ISTJ': '公务员',
-    'ISTP': '手艺人',
-    'ESFJ': '大姐姐',
-    'ESFP': '表演家',
-    'ESTJ': '企业家',
-    'ESTP': '冒险家'
+    'ENTJ': '指挥官',
+    'ENTP': '辩论家',
+    'INFJ': '提倡者',
+    'INFP': '调停者',
+    'ENFJ': '主人公',
+    'ENFP': '竞选者',
+    'ISTJ': '物流师',
+    'ISFJ': '守卫者',
+    'ESTJ': '总经理',
+    'ESFJ': '执政官',
+    'ISTP': '鉴赏家',
+    'ISFP': '探险家',
+    'ESTP': '企业家',
+    'ESFP': '表演者'
   };
 
   // 有趣的结果标题
   const resultTitles: Record<string, string> = {
-    'INFJ': '绿老头的神秘花园',
-    'INFP': '小蝴蝶的梦幻之旅',
-    'INTJ': '战略家的思维宫殿',
+    'INTJ': '建筑师的思维宫殿',
     'INTP': '逻辑学家的实验室',
-    'ENFJ': '教导主任的演讲台',
-    'ENFP': '快乐小狗的派对',
-    'ENTJ': '霸道总裁的办公室',
-    'ENTP': '发明家的创意工坊',
-    'ISFJ': '守护者的温馨小屋',
-    'ISFP': '艺术家的工作室',
-    'ISTJ': '公务员的办公桌',
-    'ISTP': '手艺人的工作坊',
-    'ESFJ': '大姐姐的客厅',
-    'ESFP': '表演家的舞台',
-    'ESTJ': '企业家的会议室',
-    'ESTP': '冒险家的丛林'
+    'ENTJ': '指挥官的指挥中心',
+    'ENTP': '辩论家的战场',
+    'INFJ': '提倡者的理想国',
+    'INFP': '调停者的和谐天地',
+    'ENFJ': '主人公的舞台',
+    'ENFP': '竞选者的竞选总部',
+    'ISTJ': '物流师的精密仓库',
+    'ISFJ': '守卫者的温馨小屋',
+    'ESTJ': '总经理的办公室',
+    'ESFJ': '执政官的议事厅',
+    'ISTP': '鉴赏家的收藏室',
+    'ISFP': '探险家的冒险营地',
+    'ESTP': '企业家的商业帝国',
+    'ESFP': '表演者的舞台'
   };
 
   // 五行颜色
