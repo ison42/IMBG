@@ -17,6 +17,23 @@ export const onRequest: PagesFunction<{
   }
 
   try {
+    // 确保数据库表存在
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS test_results (
+        id TEXT PRIMARY KEY,
+        mbti TEXT NOT NULL,
+        birth_date TEXT NOT NULL,
+        wuxing TEXT NOT NULL,
+        calibration_answer TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `).run();
+
+    // 创建索引
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_test_results_created_at ON test_results(created_at DESC)').run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_test_results_mbti ON test_results(mbti)').run();
+    await env.DB.prepare('CREATE INDEX IF NOT EXISTS idx_test_results_wuxing ON test_results(wuxing)').run();
+
     if (request.method === 'GET') {
       // 获取所有测试结果，按创建时间倒序排列
       const { results } = await env.DB.prepare(

@@ -17,6 +17,18 @@ export const onRequest: PagesFunction<{
   }
 
   try {
+    // 确保数据库表存在
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS test_results (
+        id TEXT PRIMARY KEY,
+        mbti TEXT NOT NULL,
+        birth_date TEXT NOT NULL,
+        wuxing TEXT NOT NULL,
+        calibration_answer TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `).run();
+
     if (request.method === 'GET') {
       // 获取单个测试结果
       const result = await env.DB.prepare(
