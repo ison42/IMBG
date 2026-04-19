@@ -14,28 +14,41 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // 加载测试数据
-  useEffect(() => {
-    const fetchTestResults = () => {
-      try {
-        // 从 localStorage 获取测试数据
-        const existingData = localStorage.getItem('testResults');
-        const testResults = existingData ? JSON.parse(existingData) : [];
-        
-        // 按创建时间倒序排序
-        testResults.sort((a: TestResult, b: TestResult) => {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        });
-        
-        setTestResults(testResults);
-      } catch (error) {
-        console.error('获取数据错误:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTestResults = async () => {
+    try {
+      // 从云端 API 获取测试数据
+      const response = await fetch('/api/test-results');
+      const testResults = await response.json();
+      
+      setTestResults(testResults);
+    } catch (error) {
+      console.error('获取数据错误:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTestResults();
   }, []);
+
+  // 删除测试结果
+  const deleteTestResult = async (id: string) => {
+    if (!window.confirm('确定要删除这条测试结果吗？')) {
+      return;
+    }
+
+    try {
+      await fetch(`/api/test-results/${id}`, {
+        method: 'DELETE'
+      });
+      
+      // 重新加载数据
+      await fetchTestResults();
+    } catch (error) {
+      console.error('删除数据错误:', error);
+    }
+  };
 
   return (
     <div className="container">
@@ -60,6 +73,7 @@ const Admin: React.FC = () => {
                   <th className="text-left py-3 px-4">五行</th>
                   <th className="text-left py-3 px-4">校准答案</th>
                   <th className="text-left py-3 px-4">测试时间</th>
+                  <th className="text-left py-3 px-4">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -71,6 +85,14 @@ const Admin: React.FC = () => {
                     <td className="py-3 px-4">{result.calibration_answer}</td>
                     <td className="py-3 px-4">
                       {new Date(result.created_at).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => deleteTestResult(result.id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        删除
+                      </button>
                     </td>
                   </tr>
                 ))}

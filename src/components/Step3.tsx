@@ -268,15 +268,14 @@ const Step3: React.FC<Step3Props> = ({ userData, onRestart }) => {
     return conclusions[Math.floor(Math.random() * conclusions.length)];
   };
 
-  // 收集测试数据
-  const collectUserData = () => {
+  // 收集测试数据到云端
+  const collectUserData = async () => {
     try {
-      // 从 localStorage 获取现有数据
-      const existingData = localStorage.getItem('testResults');
-      const testResults = existingData ? JSON.parse(existingData) : [];
-      
       // 检查是否已经存在相同的测试结果
-      const existingResult = testResults.find((result: any) => {
+      const checkResponse = await fetch('/api/test-results');
+      const existingResults = await checkResponse.json();
+      
+      const existingResult = existingResults.find((result: any) => {
         return result.mbti === userData.mbti &&
                result.birth_date === userData.birthDate &&
                result.wuxing === userData.wuxing &&
@@ -289,22 +288,24 @@ const Step3: React.FC<Step3Props> = ({ userData, onRestart }) => {
         return;
       }
       
-      // 添加新的测试结果
+      // 添加新的测试结果到云端
       const newResult = {
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         mbti: userData.mbti,
         birth_date: userData.birthDate,
         wuxing: userData.wuxing,
-        calibration_answer: userData.calibrationAnswer,
-        created_at: new Date().toISOString()
+        calibration_answer: userData.calibrationAnswer
       };
       
-      testResults.push(newResult);
+      const response = await fetch('/api/test-results', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newResult)
+      });
       
-      // 存储回 localStorage
-      localStorage.setItem('testResults', JSON.stringify(testResults));
-      
-      console.log('数据收集成功:', newResult);
+      const savedResult = await response.json();
+      console.log('数据收集成功:', savedResult);
     } catch (error) {
       console.error('数据收集错误:', error);
     }
