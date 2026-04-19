@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Step1 from './components/Step1';
 import Step2 from './components/Step2';
 import Step3 from './components/Step3';
@@ -48,11 +48,6 @@ function App() {
   return (
     <Router>
       <div className="app">
-        {/* 管理页面链接 */}
-        <div className="text-right p-4">
-          <Link to="/admin" className="link">管理页面</Link>
-        </div>
-        
         <Routes>
           {/* 主测试流程 */}
           <Route path="/" element={
