@@ -271,24 +271,7 @@ const Step3: React.FC<Step3Props> = ({ userData, onRestart }) => {
   // 收集测试数据到云端
   const collectUserData = async () => {
     try {
-      // 检查是否已经存在相同的测试结果
-      const checkResponse = await fetch('/api/test-results');
-      const existingResults = await checkResponse.json();
-      
-      const existingResult = existingResults.find((result: any) => {
-        return result.mbti === userData.mbti &&
-               result.birth_date === userData.birthDate &&
-               result.wuxing === userData.wuxing &&
-               result.calibration_answer === userData.calibrationAnswer;
-      });
-      
-      // 如果已经存在相同的测试结果，不重复添加
-      if (existingResult) {
-        console.log('测试数据已存在，无需重复添加:', existingResult);
-        return;
-      }
-      
-      // 添加新的测试结果到云端
+      // 添加新的测试结果到云端（每次测试都保存，不检查重复）
       const newResult = {
         mbti: userData.mbti,
         birth_date: userData.birthDate,
