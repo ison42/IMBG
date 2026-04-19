@@ -9,9 +9,60 @@ interface TestResult {
   created_at: string;
 }
 
+interface Stats {
+  totalTests: number;
+  mbtiDistribution: Record<string, number>;
+  wuxingDistribution: Record<string, number>;
+  testsByDate: Record<string, number>;
+}
+
 const Admin: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats>({
+    totalTests: 0,
+    mbtiDistribution: {},
+    wuxingDistribution: {},
+    testsByDate: {}
+  });
+
+  // 计算统计数据
+  const calculateStats = (results: TestResult[]) => {
+    const mbtiDistribution: Record<string, number> = {};
+    const wuxingDistribution: Record<string, number> = {};
+    const testsByDate: Record<string, number> = {};
+
+    results.forEach(result => {
+      // MBTI 分布
+      if (mbtiDistribution[result.mbti]) {
+        mbtiDistribution[result.mbti]++;
+      } else {
+        mbtiDistribution[result.mbti] = 1;
+      }
+
+      // 五行分布
+      if (wuxingDistribution[result.wuxing]) {
+        wuxingDistribution[result.wuxing]++;
+      } else {
+        wuxingDistribution[result.wuxing] = 1;
+      }
+
+      // 按日期统计
+      const date = result.created_at.split('T')[0];
+      if (testsByDate[date]) {
+        testsByDate[date]++;
+      } else {
+        testsByDate[date] = 1;
+      }
+    });
+
+    setStats({
+      totalTests: results.length,
+      mbtiDistribution,
+      wuxingDistribution,
+      testsByDate
+    });
+  };
 
   // 加载测试数据
   const fetchTestResults = async () => {
@@ -21,6 +72,7 @@ const Admin: React.FC = () => {
       const testResults = await response.json();
       
       setTestResults(testResults);
+      calculateStats(testResults);
     } catch (error) {
       console.error('获取数据错误:', error);
     } finally {
@@ -53,6 +105,74 @@ const Admin: React.FC = () => {
   return (
     <div className="container">
       <h1 className="title">测试数据管理</h1>
+      
+      {/* 统计数据区域 */}
+      <div className="card mb-8">
+        <h2 className="text-2xl font-bold mb-6">测试统计数据</h2>
+        
+        {loading ? (
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>加载数据中...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* 总测试次数 */}
+            <div className="bg-blue-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-blue-800">总测试次数</h3>
+              <p className="text-3xl font-bold mt-2">{stats.totalTests}</p>
+            </div>
+            
+            {/* MBTI 分布 */}
+            <div className="bg-green-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-green-800">MBTI 分布</h3>
+              <div className="mt-2 space-y-2">
+                {Object.entries(stats.mbtiDistribution)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 5)
+                  .map(([mbti, count]) => (
+                    <div key={mbti} className="flex justify-between">
+                      <span>{mbti}</span>
+                      <span className="font-medium">{count}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            {/* 五行分布 */}
+            <div className="bg-yellow-50 p-6 rounded-lg">
+              <h3 className="text-lg font-semibold text-yellow-800">五行分布</h3>
+              <div className="mt-2 space-y-2">
+                {Object.entries(stats.wuxingDistribution)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([wuxing, count]) => (
+                    <div key={wuxing} className="flex justify-between">
+                      <span>{wuxing}</span>
+                      <span className="font-medium">{count}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            
+            {/* 最近测试日期 */}
+            <div className="bg-purple-50 p-6 rounded-lg md:col-span-2 lg:col-span-3">
+              <h3 className="text-lg font-semibold text-purple-800">最近测试日期</h3>
+              <div className="mt-2 space-y-2">
+                {Object.entries(stats.testsByDate)
+                  .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
+                  .slice(0, 7)
+                  .map(([date, count]) => (
+                    <div key={date} className="flex justify-between">
+                      <span>{date}</span>
+                      <span className="font-medium">{count} 次</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
       <div className="card">
         <h2 className="text-2xl font-bold mb-6">测试结果列表</h2>
         
