@@ -71,22 +71,22 @@ const Step1: React.FC<Step1Props> = ({ onNext }) => {
   };
 
   const mbtiTypes = [
-    { type: 'INFJ', nickname: '绿老头', icon: '🧙‍♂️' },
-    { type: 'INFP', nickname: '小蝴蝶', icon: '🦋' },
     { type: 'INTJ', nickname: '建筑师', icon: '🏗️' },
-    { type: 'INTP', nickname: '科学家', icon: '🔬' },
-    { type: 'ENFJ', nickname: '教导主任', icon: '👨‍🏫' },
-    { type: 'ENFP', nickname: '快乐小狗', icon: '🐶' },
-    { type: 'ENTJ', nickname: '霸道总裁', icon: '👑' },
+    { type: 'INTP', nickname: '逻辑学家', icon: '🔬' },
+    { type: 'ENTJ', nickname: '指挥官', icon: '👑' },
     { type: 'ENTP', nickname: '辩论家', icon: '🎭' },
-    { type: 'ISFJ', nickname: '守护者', icon: '🛡️' },
-    { type: 'ISFP', nickname: '艺术家', icon: '🎨' },
-    { type: 'ISTJ', nickname: '公务员', icon: '👔' },
-    { type: 'ISTP', nickname: '手艺人', icon: '🔧' },
-    { type: 'ESFJ', nickname: '大姐姐', icon: '👩‍❤️‍👩' },
-    { type: 'ESFP', nickname: '表演家', icon: '🎪' },
-    { type: 'ESTJ', nickname: '企业家', icon: '💼' },
-    { type: 'ESTP', nickname: '冒险家', icon: '🧗' }
+    { type: 'INFJ', nickname: '提倡者', icon: '🧙‍♂️' },
+    { type: 'INFP', nickname: '调停者', icon: '🦋' },
+    { type: 'ENFJ', nickname: '主人公', icon: '👨‍🏫' },
+    { type: 'ENFP', nickname: '竞选者', icon: '🐶' },
+    { type: 'ISTJ', nickname: '物流师', icon: '👔' },
+    { type: 'ISFJ', nickname: '守卫者', icon: '🛡️' },
+    { type: 'ESTJ', nickname: '总经理', icon: '💼' },
+    { type: 'ESFJ', nickname: '执政官', icon: '👩‍❤️‍👩' },
+    { type: 'ISTP', nickname: '鉴赏家', icon: '🔧' },
+    { type: 'ISFP', nickname: '探险家', icon: '🎨' },
+    { type: 'ESTP', nickname: '企业家', icon: '💼' },
+    { type: 'ESFP', nickname: '表演者', icon: '🎪' }
   ];
 
   const handleSubmit = () => {
